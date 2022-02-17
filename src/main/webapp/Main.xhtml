@@ -1,0 +1,270 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+
+<h:head>
+    <h:outputStylesheet library="css" name="style.css"/>
+    <title>Bundesliga Fantasi - 2021/2022</title>
+</h:head>
+
+<h:body style="display: grid;background-color: whitesmoke;
+    grid-template-columns: 20% 40% 40%;
+    gap: 10px;
+">
+
+    <!-- Player Form -->
+    <p:panel header="Spieler ..." >
+        <h:form id="form2" style="background-color: red">
+
+            <p:toolbar id="toolbarplayer" >
+                <p:toolbarGroup>
+                    <p:inputText placeholder="Spieler Name" value="#{playerBean.currentPlayer.player_name}"
+                                 style="width: 200px"/>
+                    <p:commandButton value="Neu" actionListener="#{playerBean.onSave}"
+                                     update="tableplayer toolbarplayer" style="background-color: red ;border: lightcoral"/>
+                </p:toolbarGroup>
+            </p:toolbar>
+
+            <hr/>
+            <p:dataTable id="tableplayer" var="player" value="#{playerBean.playrsList}" rowKey="#{player.id}"
+                         selection="#{playerBean.deletePlayer}"
+                         selectionMode="single" editable="true"
+                       >
+
+
+                <p:column sortBy="#{player.id}"  headerText="Nr." style="width: 10% ;text-align: center">
+                    <h:outputText value="#{player.id}"/>
+                </p:column>
+
+                <p:column headerText="Spieler Name" style="width: 65%">
+                    <h:outputText value="#{player.player_name}"/>
+                </p:column>
+                <p:column sortBy="#{player.points}" headerText="Punkte" style="width: 25% ;text-align: center">
+                    <h:outputText value="#{player.points}" />
+
+                </p:column>
+
+            </p:dataTable>
+            <p:contextMenu for="tableplayer">
+                <p:menuitem value="Delete" update="tableplayer" icon="pi pi-times"
+                            actionListener="#{playerBean.onDelete}"/>
+            </p:contextMenu>
+            <hr/>
+
+
+        <p:graphicImage name="img/st123.jpg"  style="width: 100%"/>
+
+
+    </h:form>
+        <br/>
+
+
+        <p:dataTable id="tableTeams" var="team" value="#{gameBean.teamList}" rowKey="#{team.id}"
+              style="background-color: red" >
+
+
+            <p:column  style="width: 10% ; text-align: center" >
+                <h:outputText value="#{team.id}"/>
+            </p:column>
+
+            <p:column headerText="Team Name" style="width: 70%">
+                <h:outputText value="#{team.teamName}"/>
+            </p:column>
+            <p:column  headerText="Niveau" style="width: 25%; text-align: center">
+                <h:outputText value="#{team.teamNiveau==0?'C':null}
+                                     #{team.teamNiveau==2?'B':null}
+                                     #{team.teamNiveau==5?'A':null}  "  />
+
+            </p:column>
+
+
+        </p:dataTable>
+    </p:panel>
+
+    <!-- Games Form -->
+    <p:panel header="Games ...">
+
+        <h:form id="formGames" style="background-color: red">
+
+            <p:toolbar id="toolbarGames">
+                <p:toolbarGroup>
+
+                    <p:selectOneMenu placeholder="Home Team" value="#{gameBean.currentHhometeam.teamName}">
+                        <f:selectItem itemLabel="Select Home Team" itemValue=""/>
+                        <f:selectItems value="#{gameBean.teamList}" var="hTeam" itemLabel="#{hTeam.teamName}"
+                                       itemValue="#{hTeam.teamName}"/>
+                    </p:selectOneMenu>
+                    <p:selectOneMenu placeholder="Gast Team" value="#{gameBean.currentHGastteam.teamName}">
+                        <f:selectItem itemLabel="Select Gast Team" itemValue=""/>
+                        <f:selectItems value="#{gameBean.teamList}" var="gTeam" itemLabel="#{gTeam.teamName}"
+                                       itemValue="#{gTeam.teamName}"/>
+                    </p:selectOneMenu>
+                    <p:inputText placeholder="tag" value="#{gameBean.currentGame.tag}" style="width: 50px"/>
+                    <p:commandButton value="Neu Game" actionListener="#{gameBean.onSave}"
+                                     update="toolbarGames formGames" style="background-color: red ;border: lightcoral"/>
+                </p:toolbarGroup>
+            </p:toolbar>
+            <hr/>
+            <p:graphicImage name="img/logos.jpg"  style="width: 100%"/>
+            <p:dataTable id="tableGames" var="game" value="#{gameBean.gameList}" rowKey="#{game.id}"
+                         selection="#{gameBean.deletedGame}"
+                         selectionMode="single" editable="false"
+                         rowStyleClass="#{game.gameover==5?'entryprogress':null}"
+                        rowsPerPageTemplate="5,10,15"
+            paginatorTemplate="{RowsPerPageDropdown}
+            {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
+                         paginator="true" rows="10"
+            >
+                <p:column headerText="Nr." style="width: 10%">
+                    <h:outputText value="#{game.id}"/>
+                    <br/>
+
+                </p:column>
+                <p:column headerText="Home Team " >
+                    <h:outputText value="#{game.home_team}" style="width: 45%"/>
+
+                    <h:outputText value="  ( #{game.goals_home_team} )" style="font-size: medium"/>
+
+                    <br/>
+                    <h:outputText value="Max Punkte : #{game.maxP}" style="font-size: x-small"/>
+                    <br/>
+                    <p:commandButton  value="🎲" style="background-color: red ;border: lightcoral"
+                                      actionListener="#{erwartungBean.configCurrrentErwartungToSave(game.id)}"
+                                     onclick="PF('dlg3').show()" disabled="#{game.gameover==5?'true':null}"/>
+
+                <!-- Window add new Erwartung -->
+
+                    <p:dialog  header="Neue Erwartungen" widgetVar="dlg3" minHeight="600" width="600" showEffect="fade">
+
+                            <p:inputText placeholder="Home Team Goals" value="#{erwartungBean.currentErwartung.goals_home_team}"/>
+                            <hr/>
+                            <p:inputText placeholder="Gast Team Goals" value="#{erwartungBean.currentErwartung.goals_gast_team}"/>
+                            <hr/>
+                            <p:selectOneMenu placeholder="Spieler" value="#{erwartungBean.currentErwartung.id_player}">
+                                <f:selectItem itemLabel="Select Spieler" itemValue=""/>
+                                <f:selectItems value="#{playerBean.playrsList}" var="nPlayer" itemLabel="#{nPlayer.player_name}"
+                                               itemValue="#{nPlayer.id}"/>
+                            </p:selectOneMenu>
+
+
+                            <f:facet name="footer">
+                                   <p:commandButton  value="Cancel" styleClass="ui-button-flat p-mr-2" style="width: 6rem" oncomplete="PF('dlg3').hide()"/>
+                                   <p:commandButton  value="Save" style="width: 5rem" actionListener="#{erwartungBean.onSave()}"
+                                                   update="erwartungform"  oncomplete="PF('dlg3').hide()"  />
+                            </f:facet>
+
+                    </p:dialog>
+
+
+                </p:column>
+                <p:column headerText="Gast Team " style="width: 45%">
+                    <h:outputText value="#{game.gast_team}" />
+                    <h:outputText value=" ( #{game.goals_gast_team} )" style="font-size: medium"/>
+                    <br/>
+                    <h:outputText value="Mittle Punkte : #{game.mittelP}  ." style="font-size: x-small"/>
+                    <br/>
+                    <p:commandButton value="⚽" style="background-color: red ;border: lightcoral"  onclick="PF('dlg2').show()"
+                                     actionListener="#{gameBean.configCurrrentGameToUpdate(game.id)}" disabled="#{game.gameover==5?'true':null}"
+                                     />
+
+
+                    <!-- ****** Windwo Result *********-->
+                    <p:dialog  header="Gib Ergäbnis" widgetVar="dlg2" minHeight="600" width="500" showEffect="fade" >
+                        <h:outputLabel value="Home Team Goals    " style="width: 150px"/>
+                        <p:inputText placeholder="Home Team Goals" value="#{gameBean.currentGame.goals_home_team}" style="width: 50px"/>
+                        <hr/>
+                        <h:outputLabel value="Gast Team Goals    " style="width: 150px"/>
+                        <p:inputText placeholder="Gast Team Goals" value="#{gameBean.currentGame.goals_gast_team}" style="width: 50px"/>
+                        <hr/>
+
+
+
+                        <f:facet name="footer">
+                            <p:commandButton  value="Cancel" styleClass="ui-button-flat p-mr-2" style="width: 6rem" oncomplete="PF('dlg3').hide()"/>
+                            <p:commandButton  value="Save" style="width: 5rem" actionListener="#{gameBean.onGameOver()}"
+                                              oncomplete="PF('dlg2').hide()" update="@all"/>
+                        </f:facet>
+                    </p:dialog>
+
+
+                </p:column>
+
+
+            </p:dataTable>
+            <p:contextMenu for="tableGames">
+                <p:menuitem value="Delete Game" update="tableGames" icon="pi pi-times"
+                            actionListener="#{gameBean.onDelete}"/>
+            </p:contextMenu>
+
+
+        </h:form>
+    </p:panel>
+
+
+    <p:panel header="Erwartungen...">
+
+
+
+        <p:toolbar id="toolbarerwartung">
+            <p:toolbarGroup>
+                <p:graphicImage name="img/gamer.jpg"  style="height: 300px;width: 680px;"/>
+
+            </p:toolbarGroup>
+        </p:toolbar>
+
+
+
+        <h:form id="erwartungform">
+
+            <p:dataTable id="tableErwartung" var="erwartung" value="#{erwartungBean.erwartungList}" rowKey="#{erwartung.id}"
+                         selection="#{erwartungBean.deleteErwartung}"
+                         selectionMode="single" editable="false"   rowStyleClass="#{erwartung.punkte > -1?'entryopen':null}"
+                         rowsPerPageTemplate="5,10,15"
+                         paginatorTemplate="{RowsPerPageDropdown}
+            {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
+                         paginator="true" rows="10"
+
+            >
+                <p:column headerText="Nr." style="width: 10%">
+                    <h:outputText value="#{erwartung.id}"/>
+                    <br/>
+                    <h:commandButton value="👻" actionListener="#{erwartungBean.rechnen(erwartung)}"
+                                    disabled="#{erwartung.punkte != -5?'true':'false'}" />
+
+                </p:column>
+                <p:column headerText="Name/Punkte">
+                    <h:outputText  value="#{playerBean.getSpilerNameByID(erwartung.id_player)}" style="font-size: x-small"/>
+                    <br/>
+                    <h:outputText  value=" Punkte : #{erwartung.punkte}  " style="font-size: x-small"/>
+                </p:column>
+                <p:column headerText="Home Team">
+                    <h:outputText  value="#{erwartung.home_team}  " style="font-size: x-small"/>
+                    <br/>
+                    <h:outputText  value="#{erwartung.goals_home_team}" style="font-size: x-small"/>
+
+                </p:column>
+                <p:column headerText="Gast Team">
+                    <h:outputText  value="#{erwartung.gast_team}" style="font-size: x-small"/>
+                    <br/>
+                    <h:outputText  value="#{erwartung.goals_gast_team} " style="font-size: x-small"/>
+                </p:column>
+
+            </p:dataTable>
+
+        </h:form>
+
+    </p:panel>
+    <p:panel>
+        <h5>&#9400;Cimdata Java3.</h5>
+        <h6>2021 Köln.</h6>
+        <h6>Abdulrahim Tawil</h6>
+    </p:panel>
+
+
+</h:body>
+</html>

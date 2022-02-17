@@ -1,0 +1,25 @@
+/*body{
+    background-color: coral;
+}*/
+
+.entrydone{
+    background: lightgreen  !important;
+}
+.entryprogress{
+    background: lightgray !important;
+}
+.entryopen{
+    background: lightskyblue !important;
+}
+
+.ui-datatable .ui-datatable-data tr{
+    height : 10px !important;
+
+}
+
+.ui-datatable .ui-datatable-data td{
+  padding: 3px !important;
+
+}
+
+
